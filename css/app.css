@@ -7,15 +7,16 @@ html,body{
     overflow: hidden;
     font-family: Arial;
 }
-.pageview{
-   position: absolute;
-   left: 0;
-   top:0;
-   width: 100%;
+.viewport{
+   width: 300%;
    height: 100%;
+   display: -webkit-box;
    overflow: hidden;
-   -webkit-transition: 0.4s ease-out -webkit-transform;
-   -webkit-transform:translateX(0%);
+}
+.pageview{
+    -webkit-box-flex: 1;
+    width: 0;
+
 }
 .right-arrow{
     position: absolute;
