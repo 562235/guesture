@@ -1,13 +1,19 @@
 (function(window,document){
     var translate = 0;
+    var pageNow = 1;
+    var points = null;
+    var currentPoint = -1;
     var app = {
        init:function(th){
            if(/(windows)/i.test(navigator.userAgent)){
                location.href = 'views/pc.html';
            }
            document.addEventListener('DOMContentLoaded',function(){
-               app.bindTapEvent();
+               app.bindTouchEvent();
+               points = document.querySelectorAll('.pagenumber div') ;
+               app.setCurrentPosition();
            },false);
+
        }(),
 
         /**
@@ -18,10 +24,11 @@
            translate = result;
        },
 
-       bindTapEvent:function(){
+        bindTouchEvent:function(){
            var scope = this;
-           var viewport = document.querySelector('#viewport');
+           var viewport =  document.querySelector('#viewport');
            var bodyWidth = window.innerWidth;
+           var maxWidth = bodyWidth * 4;
            var startX,startY;
            var lastSize = 0;
            var finalDelta = 0;
@@ -48,7 +55,7 @@
                if (Math.abs(deltaX)>Math.abs(deltaY)){
                    finalDelta = deltaX;
                    var result = lastSize + deltaX;
-                   if (result <=0 && result >= -bodyWidth*2){
+                   if (result <=0 && result >= -bodyWidth*4){
                        scope.setViewport.call(viewport,result);
                        isSlide = true;
                    }
@@ -59,28 +66,44 @@
 
            document.addEventListener("touchend",function(e){
                e.preventDefault();
+               var transform = 0;
                deltaT = new Date().getTime() - startT;
                if (isSlide){
                     viewport.style.webkitTransition = "0.3s ease -webkit-transform";
                     if(deltaT < 300){
-                        if(direction == 'left'){
-                            scope.setViewport.call(viewport,translate-(bodyWidth+finalDelta));
-                        }else {
-                            scope.setViewport.call(viewport,translate+bodyWidth-finalDelta);
-                        }
+                        transform = direction == 'left'?
+                        translate-(bodyWidth+finalDelta):translate+bodyWidth-finalDelta;
+                        transform = transform > 0 ? 0 : transform;
+                        transform = transform < -maxWidth ? -maxWidth : transform;
+
                     }else {
                         if (Math.abs(finalDelta)/bodyWidth < 0.5){
-                            scope.setViewport.call(viewport,translate-finalDelta);
+                            transform = translate-finalDelta;
                         }else{
-                            if(direction == 'left'){
-                                scope.setViewport.call(viewport,translate-(bodyWidth+finalDelta));
-                            }else {
-                                scope.setViewport.call(viewport,translate+bodyWidth-finalDelta);
-                            }
-                        }
+                            transform = direction == 'left'?
+                            translate-(bodyWidth+finalDelta):translate+bodyWidth-finalDelta;
+                            transform = transform > 0 ? 0 : transform;
+                            transform = transform < -maxWidth ? -maxWidth : transform;
+                         }
                     }
+                   this.setViewport.call(viewport,transform);
+                   pageNow = Math.round(Math.abs(transform) / bodyWidth) + 1;
+                   setTimeout(function(){
+                       this.setCurrentPosition();
+                   }.bind(this),100);
+                   console.log(pageNow)
                 }
-           },false);
+           }.bind(this),false);
+
+
+       },
+
+       setCurrentPosition:function(){
+           if (currentPoint != -1){
+               points[currentPoint].className = '';
+           }
+           currentPoint = pageNow - 1;
+           points[currentPoint].className = 'now';
 
        }
     }
