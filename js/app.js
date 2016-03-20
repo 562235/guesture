@@ -113,7 +113,7 @@
                     setTimeout(function(){
                         //设置页码，DOM操作需要放到子线程中，否则会出现卡顿
                         this.setPageNow();
-                    }.bind(this),0);
+                    }.bind(this),100);
                 }
            }.bind(this),false);
        }
