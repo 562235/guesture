@@ -12,6 +12,9 @@ html,body{
    height: 100%;
    display: -webkit-box;
    overflow: hidden;
+   pointer-events: none;
+   -webkit-transform: translate3d(0,0,0);
+   backface-visibility: hidden;
 }
 .pageview{
     -webkit-box-flex: 1;

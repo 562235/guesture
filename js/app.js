@@ -10,8 +10,11 @@
            },false);
        }(),
 
+        /**
+         * @param result
+         */
        setViewport:function(result){
-           this.style.webkitTransform = "translate("+result+"px)";
+           this.style.webkitTransform = "translate3d("+result+"px,0,0)";
            translate = result;
        },
 
@@ -26,7 +29,6 @@
            var isSlide = false;
            var deltaT = 0;
            var startT = 0;
-
            document.addEventListener("touchstart",function(e){
                e.preventDefault();
                var touch = e.touches[0];
@@ -37,7 +39,7 @@
                viewport.style.webkitTransition = "";
                startT = new Date().getTime();
 
-           },false);
+           }.bind(this),false);
            document.addEventListener("touchmove",function(e){
                e.preventDefault();
                var touch = e.touches[0];
@@ -53,7 +55,7 @@
                    direction = deltaX>0?"right":"left";
                }
 
-           },false);
+           }.bind(this),false);
 
            document.addEventListener("touchend",function(e){
                e.preventDefault();
