@@ -24,7 +24,7 @@ html,body{
 .pagenumber{
     display: -webkit-box;
     position: absolute;
-    bottom: 3em;
+    bottom: 2em;
     left: 35%;
     height: 2em;
     width: 30%;
@@ -56,8 +56,8 @@ h3{
     font-size: 1.7em;
     font-weight: normal;
     padding: 1em 0;
+    margin: 0;
 }
-
 @media screen and (max-width: 360px) {
     html,body{font-size: 15px}
 }

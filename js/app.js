@@ -95,7 +95,39 @@
                 }
            }.bind(this),false);
 
+           document.addEventListener("touchcancel",function(e){
+               e.preventDefault();
+               var transform = 0;
+               deltaT = new Date().getTime() - startT;
+               if (isSlide){
+                   viewport.style.webkitTransition = "0.3s ease -webkit-transform";
+                   if(deltaT < 300){
+                       transform = direction == 'left'?
+                       translate-(bodyWidth+finalDelta):translate+bodyWidth-finalDelta;
+                       transform = transform > 0 ? 0 : transform;
+                       transform = transform < -maxWidth ? -maxWidth : transform;
 
+                   }else {
+                       if (Math.abs(finalDelta)/bodyWidth < 0.5){
+                           transform = translate-finalDelta;
+                       }else{
+                           transform = direction == 'left'?
+                           translate-(bodyWidth+finalDelta):translate+bodyWidth-finalDelta;
+                           transform = transform > 0 ? 0 : transform;
+                           transform = transform < -maxWidth ? -maxWidth : transform;
+                       }
+                   }
+                   this.setViewport.call(viewport,transform);
+                   pageNow = Math.round(Math.abs(transform) / bodyWidth) + 1;
+                   setTimeout(function(){
+                       this.setCurrentPosition();
+                   }.bind(this),100);
+                   console.log(pageNow)
+               }
+
+
+
+           },false)
        },
 
        setCurrentPosition:function(){
