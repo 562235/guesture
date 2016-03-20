@@ -1,11 +1,11 @@
 (function(window,document){
     var currentPosition = 0; //记录当前页面位置
     var currentPoint = -1;   //记录当前点的位置
-    var pageNow = 1;  //当前页码
+    var pageNow = 1;   //当前页码
     var points = null; //页码数
 
     var app = {
-        init:function(th){
+        init:function(){
            if(/(windows)/i.test(navigator.userAgent)){
                location.href = 'views/pc.html';
            }
