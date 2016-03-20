@@ -1,141 +1,121 @@
 (function(window,document){
-    var translate = 0;
-    var pageNow = 1;
-    var points = null;
-    var currentPoint = -1;
+    var currentPosition = 0; //记录当前页面位置
+    var currentPoint = -1;   //记录当前点的位置
+    var pageNow = 1;  //当前页码
+    var points = null; //页码数
+
     var app = {
-       init:function(th){
+        init:function(th){
            if(/(windows)/i.test(navigator.userAgent)){
                location.href = 'views/pc.html';
            }
            document.addEventListener('DOMContentLoaded',function(){
-               app.bindTouchEvent();
                points = document.querySelectorAll('.pagenumber div') ;
-               app.setCurrentPosition();
-           },false);
+               app.bindTouchEvent(); //绑定触摸事件
+               app.setPageNow();     //设置初始页码
+           }.bind(app),false);
+        }(),
 
-       }(),
+        //页面平移
+        transform:function(translate){
+           this.style.webkitTransform = "translate3d("+translate+"px,0,0)";
+           currentPosition = translate;
+        },
 
         /**
-         * @param result
+         * 设置当前页码
          */
-       setViewport:function(result){
-           this.style.webkitTransform = "translate3d("+result+"px,0,0)";
-           translate = result;
-       },
+        setPageNow:function(){
+            if (currentPoint != -1){
+                points[currentPoint].className = '';
+            }
+            currentPoint = pageNow - 1;
+            points[currentPoint].className = 'now';
+        },
 
+        /**
+         * 绑定触摸事件
+         */
         bindTouchEvent:function(){
-           var scope = this;
            var viewport =  document.querySelector('#viewport');
-           var bodyWidth = window.innerWidth;
-           var maxWidth = bodyWidth * 4;
+           var pageWidth = window.innerWidth; //页面宽度
+           var maxWidth = - pageWidth * (points.length-1); //页面滑动最后一页的位置
            var startX,startY;
-           var lastSize = 0;
-           var finalDelta = 0;
-           var direction = "";
-           var isSlide = false;
-           var deltaT = 0;
-           var startT = 0;
+           var initialPos = 0;  // 手指按下的屏幕位置
+           var moveLength = 0;  // 手指当前滑动的距离
+           var direction = "left"; //滑动的方向
+           var isMove = false; //是否发生左右滑动
+           var startT = 0; //记录手指按下去的时间
+
+           /*手指按下时*/
            document.addEventListener("touchstart",function(e){
                e.preventDefault();
                var touch = e.touches[0];
                startX = touch.pageX;
                startY = touch.pageY;
-               lastSize = translate;
-               isSlide = false;
-               viewport.style.webkitTransition = "";
-               startT = new Date().getTime();
-
+               initialPos = currentPosition;   //本次滑动前的初始位置
+               viewport.style.webkitTransition = ""; //取消动画效果
+               startT = new Date().getTime(); //记录手指按下的开始时间
+               isMove = false;
            }.bind(this),false);
+
+           /*手指在屏幕上滑动，页面跟随手指移动*/
            document.addEventListener("touchmove",function(e){
                e.preventDefault();
                var touch = e.touches[0];
                var deltaX = touch.pageX - startX;
                var deltaY = touch.pageY - startY;
-               if (Math.abs(deltaX)>Math.abs(deltaY)){
-                   finalDelta = deltaX;
-                   var result = lastSize + deltaX;
-                   if (result <=0 && result >= -bodyWidth*4){
-                       scope.setViewport.call(viewport,result);
-                       isSlide = true;
+               //如果X方向上的位移大于Y方向，则认为是左右滑动
+               if (Math.abs(deltaX) > Math.abs(deltaY)){
+                   moveLength = deltaX;
+                   var translate = initialPos + deltaX; //当前需要移动到的位置
+                   //如果translate>0 或 < maxWidth,则表示页面超出边界
+                   if (translate <=0 && translate >= maxWidth){
+                       this.transform.call(viewport,translate);
+                       isMove = true;
                    }
-                   direction = deltaX>0?"right":"left";
+                   direction = deltaX>0?"right":"left"; //判断手指滑动的方向
                }
-
            }.bind(this),false);
 
+           /*手指离开屏幕时，计算最终需要停留在哪一页*/
            document.addEventListener("touchend",function(e){
                e.preventDefault();
-               var transform = 0;
-               deltaT = new Date().getTime() - startT;
-               if (isSlide){
+               var translate = 0;
+               //计算手指在屏幕上停留的时间
+               var deltaT = new Date().getTime() - startT;
+               if (isMove){ //发生了左右滑动
+                    //使用动画过渡让页面滑动到最终的位置
                     viewport.style.webkitTransition = "0.3s ease -webkit-transform";
-                    if(deltaT < 300){
-                        transform = direction == 'left'?
-                        translate-(bodyWidth+finalDelta):translate+bodyWidth-finalDelta;
-                        transform = transform > 0 ? 0 : transform;
-                        transform = transform < -maxWidth ? -maxWidth : transform;
-
+                    if(deltaT < 300){ //如果停留时间小于300ms,则认为是快速滑动，无论滑动距离是多少，都停留到下一页
+                        translate = direction == 'left'?
+                        currentPosition-(pageWidth+moveLength):currentPosition+pageWidth-moveLength;
+                        //如果最终位置超过边界位置，则停留在边界位置
+                        translate = translate > 0 ? 0 : translate; //左边界
+                        translate = translate < maxWidth ? maxWidth : translate; //右边界
                     }else {
-                        if (Math.abs(finalDelta)/bodyWidth < 0.5){
-                            transform = translate-finalDelta;
+                        //如果滑动距离小于屏幕的50%，则退回到上一页
+                        if (Math.abs(moveLength)/pageWidth < 0.5){
+                            translate = currentPosition-moveLength;
                         }else{
-                            transform = direction == 'left'?
-                            translate-(bodyWidth+finalDelta):translate+bodyWidth-finalDelta;
-                            transform = transform > 0 ? 0 : transform;
-                            transform = transform < -maxWidth ? -maxWidth : transform;
-                         }
+                            //如果滑动距离大于屏幕的50%，则滑动到下一页
+                            translate = direction == 'left'?
+                            currentPosition-(pageWidth+moveLength):currentPosition+pageWidth-moveLength;
+                            translate = translate > 0 ? 0 : translate;
+                            translate = translate < maxWidth ? maxWidth : translate;
+                        }
                     }
-                   this.setViewport.call(viewport,transform);
-                   pageNow = Math.round(Math.abs(transform) / bodyWidth) + 1;
-                   setTimeout(function(){
-                       this.setCurrentPosition();
-                   }.bind(this),100);
-                   console.log(pageNow)
+                    //执行滑动，让页面完整的显示到屏幕上
+                    this.transform.call(viewport,translate);
+                    //计算当前的页码
+                    pageNow = Math.round(Math.abs(translate) / pageWidth) + 1;
+
+                    setTimeout(function(){
+                        //设置页码，DOM操作需要放到子线程中，否则会出现卡顿
+                        this.setPageNow();
+                    }.bind(this),0);
                 }
            }.bind(this),false);
-
-           document.addEventListener("touchcancel",function(e){
-               e.preventDefault();
-               var transform = 0;
-               deltaT = new Date().getTime() - startT;
-               if (isSlide){
-                   viewport.style.webkitTransition = "0.3s ease -webkit-transform";
-                   if(deltaT < 300){
-                       transform = direction == 'left'?
-                       translate-(bodyWidth+finalDelta):translate+bodyWidth-finalDelta;
-                       transform = transform > 0 ? 0 : transform;
-                       transform = transform < -maxWidth ? -maxWidth : transform;
-
-                   }else {
-                       if (Math.abs(finalDelta)/bodyWidth < 0.5){
-                           transform = translate-finalDelta;
-                       }else{
-                           transform = direction == 'left'?
-                           translate-(bodyWidth+finalDelta):translate+bodyWidth-finalDelta;
-                           transform = transform > 0 ? 0 : transform;
-                           transform = transform < -maxWidth ? -maxWidth : transform;
-                       }
-                   }
-                   this.setViewport.call(viewport,transform);
-                   pageNow = Math.round(Math.abs(transform) / bodyWidth) + 1;
-                   setTimeout(function(){
-                       this.setCurrentPosition();
-                   }.bind(this),100);
-                   console.log(pageNow)
-               }
-
-
-
-           },false)
-       },
-
-       setCurrentPosition:function(){
-           if (currentPoint != -1){
-               points[currentPoint].className = '';
-           }
-           currentPoint = pageNow - 1;
-           points[currentPoint].className = 'now';
        }
     }
 })(window,document);
