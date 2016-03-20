@@ -104,7 +104,6 @@
            }
            currentPoint = pageNow - 1;
            points[currentPoint].className = 'now';
-
        }
     }
 })(window,document);
