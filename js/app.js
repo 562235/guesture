@@ -63,7 +63,7 @@
 
            /*手指放在屏幕上*/
            document.addEventListener("touchstart",function(e){
-               //e.preventDefault();
+               e.preventDefault();
                var touch = e.touches[0];
                startX = touch.pageX;
                startY = touch.pageY;
