@@ -12,14 +12,28 @@
            document.addEventListener('DOMContentLoaded',function(){
                points = document.querySelectorAll('.pagenumber div') ;
                app.bindTouchEvent(); //绑定触摸事件
+               app.bindBtnClick();   //绑定按钮点击事件
                app.setPageNow();     //设置初始页码
            }.bind(app),false);
         }(),
+
+
+        bindBtnClick:function(){
+            var button = document.querySelector('#testbtn');
+            button.addEventListener('touchstart',function(){
+                console.log('touch')
+            })
+            //button.addEventListener('click',function(){
+            //    console.log('click')
+            //})
+        },
+
 
         //页面平移
         transform:function(translate){
            this.style.webkitTransform = "translate3d("+translate+"px,0,0)";
            currentPosition = translate;
+
         },
 
         /**
@@ -47,16 +61,16 @@
            var isMove = false; //是否发生左右滑动
            var startT = 0; //记录手指按下去的时间
 
-           /*手指按下时*/
+           /*手指放在屏幕上*/
            document.addEventListener("touchstart",function(e){
-               e.preventDefault();
+               //e.preventDefault();
                var touch = e.touches[0];
                startX = touch.pageX;
                startY = touch.pageY;
                initialPos = currentPosition;   //本次滑动前的初始位置
                viewport.style.webkitTransition = ""; //取消动画效果
                startT = new Date().getTime(); //记录手指按下的开始时间
-               isMove = false;
+               isMove = false; //是否产生滑动
            }.bind(this),false);
 
            /*手指在屏幕上滑动，页面跟随手指移动*/
