@@ -39,8 +39,8 @@ html,body{
 }
 .pagenumber div:after{
     content: "";
-    width: 0.4em;
-    height: 0.4em;
+    width: 8px;
+    height: 8px; 
     background: rgba(255,255,255,0.5);
     border-radius: 2em;
     position: absolute;
