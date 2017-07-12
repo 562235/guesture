@@ -74,6 +74,7 @@
                    viewport.style.webkitTransition = ""; //取消动画效果
                    startT = new Date().getTime(); //记录手指按下的开始时间
                    isMove = false; //是否产生滑动
+                   isTouchEnd = false; //滑动开始
                }
            }.bind(this),false);
 
