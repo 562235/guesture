@@ -60,22 +60,29 @@
            var direction = "left"; //滑动的方向
            var isMove = false; //是否发生左右滑动
            var startT = 0; //记录手指按下去的时间
+           var isTouchEnd = true; //标记当前滑动是否结束(手指已离开屏幕) 
 
            /*手指放在屏幕上*/
            document.addEventListener("touchstart",function(e){
                e.preventDefault();
-               var touch = e.touches[0];
-               startX = touch.pageX;
-               startY = touch.pageY;
-               initialPos = currentPosition;   //本次滑动前的初始位置
-               viewport.style.webkitTransition = ""; //取消动画效果
-               startT = new Date().getTime(); //记录手指按下的开始时间
-               isMove = false; //是否产生滑动
+               //单手指触摸或者多手指同时触摸，禁止第二个手指延迟操作事件
+               if(e.touches.length == 1 || isTouchEnd){
+                   var touch = e.touches[0];
+                   startX = touch.pageX;
+                   startY = touch.pageY;
+                   initialPos = currentPosition;   //本次滑动前的初始位置
+                   viewport.style.webkitTransition = ""; //取消动画效果
+                   startT = new Date().getTime(); //记录手指按下的开始时间
+                   isMove = false; //是否产生滑动
+               }
            }.bind(this),false);
 
            /*手指在屏幕上滑动，页面跟随手指移动*/
            document.addEventListener("touchmove",function(e){
                e.preventDefault();
+               //如果当前滑动已结束，不管其他手指是否在屏幕上都禁止该事件
+               if(isTouchEnd) return ;
+               
                var touch = e.touches[0];
                var deltaX = touch.pageX - startX;
                var deltaY = touch.pageY - startY;
@@ -90,6 +97,7 @@
                    }
                    direction = deltaX>0?"right":"left"; //判断手指滑动的方向
                }
+               
            }.bind(this),false);
 
            /*手指离开屏幕时，计算最终需要停留在哪一页*/
@@ -98,7 +106,10 @@
                var translate = 0;
                //计算手指在屏幕上停留的时间
                var deltaT = new Date().getTime() - startT;
-               if (isMove){ //发生了左右滑动
+               //发生了滑动，并且当前滑动事件未结束
+               if (isMove && !isTouchEnd){ 
+                   isTouchEnd = true; //标记当前完整的滑动事件已经结束 
+                   
                     //使用动画过渡让页面滑动到最终的位置
                     viewport.style.webkitTransition = "0.3s ease -webkit-transform";
                     if(deltaT < 300){ //如果停留时间小于300ms,则认为是快速滑动，无论滑动距离是多少，都停留到下一页
@@ -125,7 +136,7 @@
                     pageNow = Math.round(Math.abs(translate) / pageWidth) + 1;
 
                     setTimeout(function(){
-                        //设置页码，DOM操作需要放到子线程中，否则会出现卡顿
+                        //设置页码，DOM操作需要放到异步队列中，否则会出现卡顿
                         this.setPageNow();
                     }.bind(this),100);
                 }
