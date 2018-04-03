@@ -62,7 +62,7 @@
 
            /*手指放在屏幕上*/
            document.addEventListener("touchstart",function(e){
-               e.preventDefault();
+               // e.preventDefault();
                //单手指触摸或者多手指同时触摸，禁止第二个手指延迟操作事件
                if(e.touches.length == 1 || isTouchEnd){
                    var touch = e.touches[0];
@@ -102,7 +102,7 @@
 
            /*手指离开屏幕时，计算最终需要停留在哪一页*/
            document.addEventListener("touchend",function(e){
-               e.preventDefault();
+               // e.preventDefault();
                var translate = 0;
                //计算手指在屏幕上停留的时间
                var deltaT = new Date().getTime() - startT;
