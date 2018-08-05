@@ -6,6 +6,13 @@ html,body{
     position: relative;
     overflow: hidden;
     font-family: Arial;
+    background: #000;
+}
+.container{
+   position:absolute;
+   height: 180px;
+   top: 50%;
+   margin-top:-90px;
 }
 .viewport{
    width: 500%;
@@ -24,7 +31,7 @@ html,body{
 .pagenumber{
     display: -webkit-box;
     position: absolute;
-    bottom: 2em;
+    bottom: 5%;
     left: 35%;
     height: 2em;
     width: 30%;
