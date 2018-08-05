@@ -61,7 +61,7 @@
            var isTouchEnd = true; // 标记当前滑动是否结束(手指已离开屏幕) 
 
            // 手指放在屏幕上
-           document.addEventListener('touchstart', function (e) {
+           viewport.addEventListener('touchstart', function (e) {
                // e.preventDefault();
                // 单手指触摸或者多手指同时触摸，禁止第二个手指延迟操作事件
                if (e.touches.length === 1 || isTouchEnd) {
@@ -77,7 +77,7 @@
            }.bind(this), false);
 
            // 手指在屏幕上滑动，页面跟随手指移动
-           document.addEventListener('touchmove', function (e) {
+           viewport.addEventListener('touchmove', function (e) {
                e.preventDefault();
                
                // 如果当前滑动已结束，不管其他手指是否在屏幕上都禁止该事件
@@ -103,7 +103,7 @@
            }.bind(this),false);
 
            // 手指离开屏幕时，计算最终需要停留在哪一页
-           document.addEventListener('touchend', function (e) {
+           viewport.addEventListener('touchend', function (e) {
                // e.preventDefault();
                var translate = 0;
                // 计算手指在屏幕上停留的时间
