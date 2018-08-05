@@ -39,15 +39,15 @@ html,body{
 }
 .pagenumber div:after{
     content: "";
-    width: 8px;
-    height: 8px; 
+    width: 6px;
+    height: 6px; 
     background: rgba(255,255,255,0.3);
     border-radius: 50%;
     position: absolute;
     top: 50%;
     left: 50%;
-    margin-top: -0.2em;
-    margin-left: -0.2em;
+    margin-top: -3px;
+    margin-left: -3px;
 }
 h3{
     text-align: center;
