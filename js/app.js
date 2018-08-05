@@ -86,38 +86,45 @@
                var touch = e.touches[0];
                var deltaX = touch.pageX - startX;
                var deltaY = touch.pageY - startY;
-               // 如果X方向上的位移大于Y方向，则认为是左右滑动
-               if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                   moveLength = deltaX;
-                   var translate = initialPos + deltaX; // 当前需要移动到的位置
-                   // 如果translate>0 或 < maxWidth,则表示页面超出边界
-                   if (translate <=0 && translate >= maxWidth) {
-                       this.transform.call(viewport, translate);
-                       isMove = true;
-                   }
-                   direction = deltaX > 0 ? 'right' : 'left'; // 判断手指滑动的方向
-               }
                
+               var translate = initialPos + deltaX; // 当前需要移动到的位置
+               // 如果translate>0 或 < maxWidth,则表示页面超出边界
+               if (translate > 0) {
+                  translate = 0; 
+               }
+               if (translate < maxWidth) {
+                  translate = maxWidth; 
+               }
+               deltaX = translate - initialPos;
+               this.transform.call(viewport, translate);
+               isMove = true;
+               moveLength = deltaX;
+               direction = deltaX > 0 ? 'right' : 'left'; // 判断手指滑动的方向
            }.bind(this),false);
 
            // 手指离开屏幕时，计算最终需要停留在哪一页
            document.addEventListener('touchend', function (e) {
                // e.preventDefault();
                var translate = 0;
-               //计算手指在屏幕上停留的时间
+               // 计算手指在屏幕上停留的时间
                var deltaT = + new Date() - startT;
                // 发生了滑动，并且当前滑动事件未结束
                if (isMove && !isTouchEnd) { 
-                   isTouchEnd = true; // 标记当前完整的滑动事件已经结束 
-                   
+                    isTouchEnd = true; // 标记当前完整的滑动事件已经结束 
                     // 使用动画过渡让页面滑动到最终的位置
                     viewport.style.webkitTransition = '0.3s ease -webkit-transform';
                     if (deltaT < 300) { // 如果停留时间小于300ms,则认为是快速滑动，无论滑动距离是多少，都停留到下一页
-                        translate = direction === 'left' ? currentPosition-(pageWidth + moveLength)
-                        : currentPosition + pageWidth - moveLength;
+                        if (currentPosition === 0 && translate === 0) {
+                            return ;
+                        }
+                        translate = direction === 'left' ? 
+                            currentPosition - (pageWidth + moveLength) 
+                            : currentPosition + pageWidth - moveLength;
                         // 如果最终位置超过边界位置，则停留在边界位置
-                        translate = translate > 0 ? 0 : translate; //左边界
-                        translate = translate < maxWidth ? maxWidth : translate; //右边界
+                        // 左边界
+                        translate = translate > 0 ? 0 : translate; 
+                        // 右边界
+                        translate = translate < maxWidth ? maxWidth : translate; 
                     } else {
                         // 如果滑动距离小于屏幕的50%，则退回到上一页
                         if (Math.abs(moveLength) / pageWidth < 0.5) {
